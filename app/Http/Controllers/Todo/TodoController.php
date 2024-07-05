@@ -14,12 +14,18 @@ class TodoController extends Controller
     public function index()
     {
         if (request('search')) {
-            $data = Todo::where('tasks','like','%'.request('search').'%')->get();
+            $data = Todo::where('is_done', 0)->where('tasks','like','%'.request('search').'%')->get();
+            $datadone = Todo::where('is_done', 1)->where('tasks','like','%'.request('search').'%')->get();
         }
         else {
-            $data = Todo::orderBy('tasks', 'asc')->get();
+            $data = Todo::orderBy('tasks', 'asc')->where('is_done', 0)->get();
+            $datadone = Todo::where('is_done', 1)->orderBy('tasks', 'asc')->get();
         }
-        return view('todo.app', ['data' => $data]);
+        return view('todo.app', 
+        [
+            'data' => $data,
+            'datadone' => $datadone
+        ]);
     }
 
     /**

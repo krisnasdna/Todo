@@ -104,12 +104,12 @@
             </div>
             <div class="container mx-auto pt-10">
                 @if (session('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
+                    <div class=" flex justify-center justify-items-center w-50">
+                        <p class="border-2 border-green-600 bg-green-300 p-3 rounded-xl">{{ session('success') }}</p>
                     </div>
                 @endif
                 @if ($errors->any())
-                <div class="alert alert-danger">
+                <div class="text-center">
                     <ul>
                         @foreach ($errors->all() as $error)
                             <li>
@@ -122,13 +122,20 @@
                 @endif
                 <form action="{{ route('todo.post') }}" method="POST">
                     @csrf
-                    <div class="text-center">
+                    <div class="text-center pt-5">
                         <input type="text" class="border-2 border-black rounded-xl p-3 w-6/12" name="task" placeholder="Tambahkan Task Baru" required value="{{ old('task') }}">
                         <button type="submit" class=" ps-5 rounded-xl p-3 border-2 border-black">Simpan</button>
                     </div>
                 </form>
             </div>
-            <div class="container pt-10">
+            <div class="text-right pt-3 ">
+                <form action="{{ route('todo') }}" method="GET">
+                    <input type="text" class="border-2 border-black rounded-xl outline-none p-1 px-3" name="search" value="{{ request('search') }}" placeholder="Search Tasks.....">
+                    <button class="btn btn-secondary" type="submit"></button>
+                </form>
+            </div>
+            <div class="container pt-5" x-data="{ isOpen: false }">
+                <h1 class="py-5 text-2xl font-bold capitalize">Pending Tasks</h1>
                 <div class="grid grid-cols-3 grid-flow-row gap-4">
                     @foreach ($data as $todo)
                     <div class="p-5 bg-red-300 rounded-xl">
@@ -139,11 +146,123 @@
                             </div>
                             <div class="text-right">
                                 <div class="flex flex-col gap-3 justify-center justify-items-center">
-                                    <button>✕</button>
-                                    <button>✎</button>
+                                    <form action="{{ route('todo.delete',['id'=>$todo->id]) }}" method="POST">
+                                        @csrf
+                                        @method('delete')
+                                        <button>✕</button>
+                                    </form>
+                                    <button @click="isOpen = '{{ $loop->index }}'" >✎</button>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div
+                    x-show="isOpen === '{{ $loop->index}}'"
+                    x-transition:enter="transition ease-out duration-100 transform"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-75 transform"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-95"
+                    class="origin-top-right rounded-xl shadow-lg"
+                    >
+                    <div class="rounded-xl p-5 bg-white shadow-xs">
+                        <form action="{{ route('todo.update',['id'=>$todo->id]) }}" method="POST">
+                            @csrf
+                            @method('put')
+                            <div class="flex flex-row justify-center gap-3">
+                                <div class="grow">
+                                    <input type="text" class="outline-none font-bold tracking-wide capitalize text-xl" name="task"
+                                    value="{{ $todo->tasks }}">
+                                    <div class="flex pt-3">
+                                        <div class="radio px-2">
+                                            <label>
+                                                <input type="radio" value="1" name="is_done" {{ $todo->is_done == '1' ? 'Checked':'' }}> Selesai
+                                            </label>
+                                        </div>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" value="0" name="is_done"  {{ $todo->is_done == '0' ? 'Checked':'' }}> Belum
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="flex flex-col gap-3 justify-center justify-items-center">
+                                        <button class="" type="submit">✎</button>
+                                        <div @click="isOpen = false" class="cursor-pointer">✕</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            <div class="container pt-10"  x-data="{ isOpen: '1' }" >
+                <h1 class="py-5 text-2xl font-bold capitalize">Completed Tasks</h1>
+                <div class="grid grid-cols-3 grid-flow-row gap-4">
+                    @foreach ($datadone as $tododone)
+                    <div class="p-5 bg-green-300 rounded-xl">
+                        <div class="flex flex-row justify-center gap-3">
+                            <div class="grow">
+                                <h1 class="font-bold tracking-wide capitalize text-xl">{{ $tododone->tasks }}</h1>
+                                <p class="pt-2">{{ $tododone->tasks }}</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="flex flex-col gap-3 justify-center justify-items-center">
+                                    <form action="{{ route('todo.delete',['id'=>$tododone->id]) }}" method="POST">
+                                        @csrf
+                                        @method('delete')
+                                        <button>✕</button>
+                                    </form>
+                                    <button @click="isOpen = '{{ $loop->index }}'" >✎</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                    x-show="isOpen === '{{ $loop->index}}'"
+                    x-transition:enter="transition ease-out duration-100 transform"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-75 transform"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-95"
+                    class="origin-top-right rounded-xl shadow-lg"
+                    >
+                    <div class="rounded-xl p-5 bg-white shadow-xs">
+                        <form action="{{ route('todo.update',['id'=>$tododone->id]) }}" method="POST">
+                            @csrf
+                            @method('put')
+                            <div class="flex flex-row justify-center gap-3">
+                                <div class="grow">
+                                    <input type="text" class="outline-none font-bold tracking-wide capitalize text-xl" name="task"
+                                    value="{{ $tododone->tasks }}">
+                                    <div class="flex pt-3">
+                                        <div class="radio px-2">
+                                            <label>
+                                                <input type="radio" value="1" name="is_done" {{ $tododone->is_done == '1' ? 'Checked':'' }}> Selesai
+                                            </label>
+                                        </div>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" value="0" name="is_done"  {{ $tododone->is_done == '0' ? 'Checked':'' }}> Belum
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="flex flex-col gap-3 justify-center justify-items-center">
+                                        <button class="" type="submit">✎</button>
+                                        <div @click="isOpen = false" class="cursor-pointer">✕</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                     </div>
                     @endforeach
                 </div>
