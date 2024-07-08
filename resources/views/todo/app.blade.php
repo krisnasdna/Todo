@@ -16,10 +16,11 @@
     <nav class="bg-white" x-data="{ isOpen: false }" >
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex h-16 items-center justify-between">
-            <div class="flex items-center">
-            <div class="flex-shrink-0">
-                <img class="h-8 w-8" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company">
-            </div>
+            <div class="flex items-center flex-row gap-2">
+                <div class="flex-shrink-0 ">
+                    <img class="h-8 w-10" src="{{ asset('img/todo-icon.png') }}" alt="Todo App">
+                </div>
+                <h1 class="text-blue-700 font-bold">TODO APP</h1>
             </div>
             <div class="hidden md:block">
             <div class="ml-4 flex items-center md:ml-6">
@@ -52,7 +53,7 @@
                 x-transition:leave-end="opacity-0 scale-95"
                 class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
                     <!-- Active: "bg-gray-100", Not Active: "" -->
-                    <a href="#" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-2">Sign out</a>
+                    <a href="{{ route('logout') }}" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-2">Sign out</a>
                 </div>
                 </div>
             </div>
@@ -92,12 +93,13 @@
             </div>
             </div>
             <div class="mt-3 space-y-1 px-2">
-            <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white">Sign out</a>
+            <a href="{{ route('logout') }}" class="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white">Sign out</a>
             </div>
         </div>
         </div>
     </nav>
     <main class="pt-10">
+        <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8"><h4 class="text-5xl">Welcome <b>{{Auth::user()->name}}</b></h4></div>
         <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 bg-white rounded-xl">
             <div class="text-center pt-10">
                 <h1 class="text-5xl font-bold">Todo List</h1>
@@ -122,9 +124,10 @@
                 @endif
                 <form action="{{ route('todo.post') }}" method="POST">
                     @csrf
-                    <div class="text-center pt-5">
-                        <input type="text" class="border-2 border-black rounded-xl p-3 w-6/12" name="task" placeholder="Tambahkan Task Baru" required value="{{ old('task') }}">
-                        <button type="submit" class=" ps-5 rounded-xl p-3 border-2 border-black">Simpan</button>
+                    <div class="pt-5 flex md:flex-row flex-col gap-3 justify-center justify-items-center w-full"> 
+                        <div class="w-full md:w-4/12"><input type="text" class="border-2 border-black rounded-xl p-3 w-full" name="title" placeholder="Title Task" required value="{{ old('title') }}"></div>
+                        <div class="w-full"><input type="text" class="border-2 border-black rounded-xl p-3 w-full" name="task" placeholder="Description Task" required value="{{ old('task') }}"></div>
+                        <div class="w-full md:w-4/12"><button type="submit" class=" ps-5 rounded-xl p-3 border-2 border-black w-full">Simpan</button></div> 
                     </div>
                 </form>
             </div>
@@ -136,12 +139,12 @@
             </div>
             <div class="container pt-5" x-data="{ isOpen: false }">
                 <h1 class="py-5 text-2xl font-bold capitalize">Pending Tasks</h1>
-                <div class="grid grid-cols-3 grid-flow-row gap-4">
+                <div class="grid xl:grid-cols-3 sm:grid-cols-1 grid-flow-row gap-4">
                     @foreach ($data as $todo)
                     <div class="p-5 bg-red-300 rounded-xl">
                         <div class="flex flex-row justify-center gap-3">
                             <div class="grow">
-                                <h1 class="font-bold tracking-wide capitalize text-xl">{{ $todo->tasks }}</h1>
+                                <h1 class="font-bold tracking-wide capitalize text-xl">{{ $todo->title }}</h1>
                                 <p class="pt-2">{{ $todo->tasks }}</p>
                             </div>
                             <div class="text-right">
@@ -172,8 +175,12 @@
                             @method('put')
                             <div class="flex flex-row justify-center gap-3">
                                 <div class="grow">
-                                    <input type="text" class="outline-none font-bold tracking-wide capitalize text-xl" name="task"
-                                    value="{{ $todo->tasks }}">
+                                    <div class=""> 
+                                        <input type="text" class="outline-none border-none font-bold tracking-wide capitalize text-xl " name="title" value="{{ $todo->title }}">
+                                    </div>
+                                    <div class="pt-3">
+                                        <input type="text" class="outline-none border-none tracking-wide " name="task" value="{{ $todo->tasks}}">
+                                    </div>
                                     <div class="flex pt-3">
                                         <div class="radio px-2">
                                             <label>
@@ -203,12 +210,12 @@
             </div>
             <div class="container pt-10"  x-data="{ isOpen: '1' }" >
                 <h1 class="py-5 text-2xl font-bold capitalize">Completed Tasks</h1>
-                <div class="grid grid-cols-3 grid-flow-row gap-4">
+                <div class="grid xl:grid-cols-3 sm:grid-cols-1 grid-flow-row gap-4">
                     @foreach ($datadone as $tododone)
                     <div class="p-5 bg-green-300 rounded-xl">
                         <div class="flex flex-row justify-center gap-3">
                             <div class="grow">
-                                <h1 class="font-bold tracking-wide capitalize text-xl">{{ $tododone->tasks }}</h1>
+                                <h1 class="font-bold tracking-wide capitalize text-xl">{{ $tododone->title }}</h1>
                                 <p class="pt-2">{{ $tododone->tasks }}</p>
                             </div>
                             <div class="text-right">
@@ -270,137 +277,6 @@
         </div>
     </main>
     </div>
-
-    {{-- <!-- 00. Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid col-md-7">
-            <div class="navbar-brand">Simple To Do List</div>
-            <!-- 
-            <div class="navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Akun Saya
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="#">Logout</a></li>
-                            <li><a class="dropdown-item" href="#">Update Data</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        -->
-        </div>
-    </nav>
-    
-    <div class="container mt-4">
-        <!-- 01. Content-->
-        <h1 class="text-center mb-4">To Do List</h1>
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-             <div class="card mb-3">
-                <div class="card-body">
-                    @if (session('success'))
-                        <div class="alert alert-success">
-                            {{ session('success') }}
-                        </div>
-                    @endif
-                    @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>
-                                    {{ $error }}
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                    
-                    @endif
-                    <!-- 02. Form input data -->
-                    <form id="todo-form" action="{{ route('todo.post') }}" method="post">
-                        @csrf
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" name="task" id="todo-input"
-                                placeholder="Tambah task baru" required value="{{ old('task') }}">
-                            <button class="btn btn-primary" type="submit">
-                                Simpan
-                            </button>
-                        </div>
-                    </form>
-                  </div>
-                </div>
-                <div class="card">
-                    <div class="card-body">
-                        <!-- 03. Searching -->
-                        <form id="todo-form" action="{{ route('todo') }}" method="get">
-                            <div class="input-group mb-3">
-                                <input type="text" class="form-control" name="search" value="{{ request('search') }}" 
-                                    placeholder="masukkan kata kunci">
-                                <button class="btn btn-secondary" type="submit">
-                                    Cari
-                                </button>
-                            </div>
-                        </form>
-                        
-                        <ul class="list-group mb-4" id="todo-list">
-                            <!-- 04. Display Data -->
-                            @foreach ($data as $todolist)
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span class="task-text">{{ $todolist->tasks }}</span>
-                                <input type="text" class="form-control edit-input" style="display: none;"
-                                    value="{{ $todolist->tasks }}">
-                                <div class="btn-group">
-                                    <form action="{{ route('todo.delete',['id'=>$todolist->id]) }}" method="POST">
-                                        @csrf
-                                        @method('delete')
-                                        <button class="btn btn-danger btn-sm delete-btn">✕</button>
-                                    </form>
-                                    <button class="btn btn-primary btn-sm edit-btn" data-bs-toggle="collapse"
-                                        data-bs-target="#collapse-{{ $loop->index}}" aria-expanded="false">✎</button>
-                                </div>
-                            </li>
-                            <!-- 05. Update Data -->
-                            <li class="list-group-item collapse" id="collapse-{{ $loop->index}}">
-                                <form action="{{ route('todo.update',['id'=>$todolist->id]) }}" method="POST">
-                                    @csrf
-                                    @method('put')
-                                    <div>
-                                        <div class="input-group mb-3">
-                                            <input type="text" class="form-control" name="task"
-                                                value="{{ $todolist->tasks }}">
-                                            <button class="btn btn-outline-primary" type="submit">Update</button>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex">
-                                        <div class="radio px-2">
-                                            <label>
-                                                <input type="radio" value="1" name="is_done" {{ $todolist->is_done == '1' ? 'Checked':'' }}> Selesai
-                                            </label>
-                                        </div>
-                                        <div class="radio">
-                                            <label>
-                                                <input type="radio" value="0" name="is_done"  {{ $todolist->is_done == '0' ? 'Checked':'' }}> Belum
-                                            </label>
-                                        </div>
-                                    </div>
-                                </form>
-                            </li>
-                            @endforeach
-                        </ul>
-                        
-                        
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> --}}
-
-    {{-- <!-- Bootstrap JS Bundle (popper.js included) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js">
-    </script> --}}
-
 </body>
 
 </html>

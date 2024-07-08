@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Todo;
 
-use App\Http\Controllers\Controller;
 use App\Models\Todo;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+
+use function Laravel\Prompts\search;
 
 class TodoController extends Controller
 {
@@ -13,19 +16,17 @@ class TodoController extends Controller
      */
     public function index()
     {
-        if (request('search')) {
-            $data = Todo::where('is_done', 0)->where('tasks','like','%'.request('search').'%')->get();
-            $datadone = Todo::where('is_done', 1)->where('tasks','like','%'.request('search').'%')->get();
+
+        if(request('search')){
+            $user = Auth::id();
+            $data = Todo::where('is_done', 0)->where('title','like','%'.request('search').'%')->where('user_id', $user)->get();
+            $datadone = Todo::where('is_done', 1)->where('title','like','%'.request('search').'%')->where('user_id', $user)->get();
+        }else{
+            $user = Auth::user();
+            $data = $user->todos->where('is_done', 0); 
+            $datadone = $user->todos->where('is_done', 1);
         }
-        else {
-            $data = Todo::orderBy('tasks', 'asc')->where('is_done', 0)->get();
-            $datadone = Todo::where('is_done', 1)->orderBy('tasks', 'asc')->get();
-        }
-        return view('todo.app', 
-        [
-            'data' => $data,
-            'datadone' => $datadone
-        ]);
+        return view('todo.app', compact('data', 'datadone'));
     }
 
     /**
@@ -49,7 +50,9 @@ class TodoController extends Controller
         ]);
 
         $data = [
-            'tasks' => $request->input('task')
+            'title'=>$request->input('title'),
+            'tasks' => $request->input('task'),
+            'user_id'=> Auth::id(),
         ];
 
         Todo::create($data);
@@ -86,8 +89,11 @@ class TodoController extends Controller
         ]);
 
         $data = [
+            'title'=>$request->input('title'),
             'tasks' => $request->input('task'),
-            'is_done' => $request->input('is_done')
+            'is_done' => $request->input('is_done'),
+            'user_id'=> Auth::id(),
+        
         ];
 
         Todo::where('id', $id)->update($data);
